@@ -1,4 +1,4 @@
-Analisando subreddits e paralvras chaves para buscar nos títulos de cada um.
+Analisando subreddits e paralvras chaves para buscar nos títulos de cada um. (A busca é feita com foco em comentários em inglês)
 
 sub redits utilizados :  
  "depression",
