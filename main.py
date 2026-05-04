@@ -33,15 +33,15 @@ DELAY_BETWEEN_REQUESTS = 2      # segundos de espera entre requisições (evita 
 # ─────────────────────────────────────────────
 
 SEED_SUBREDDITS = [
-    "depression",
-    "Anxiety",
-    "addiction",
-    "teenagers",
+    # "depression",
+    # "Anxiety",
+    # "addiction",
+    # "teenagers",
     "nosurf",
     "selfimprovement",
     "selfhelp",
     "study",
-    "studytips",
+    # "studytips",
     "getdisciplined",
     "productivity",
     "digitalminimalism",

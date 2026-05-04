@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 # ─────────────────────────────────────────────
 
 OUTPUT_DIR = "./" 
-DEPTH_TO_SCRAPE = 0  # Ajuste para a profundidade (pasta) que deseja ler
+DEPTH_TO_SCRAPE = 2  # Ajuste para a profundidade (pasta) que deseja ler
 COMMENTS_CSV_PATH = f"{OUTPUT_DIR}/all_comments_depth_{DEPTH_TO_SCRAPE}.csv"
 
 HEADERS = {
