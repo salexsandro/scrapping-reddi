@@ -11,8 +11,8 @@ from bs4 import BeautifulSoup
 # ─────────────────────────────────────────────
 
 OUTPUT_DIR = "./" 
-DEPTH_TO_SCRAPE = 2  # Ajuste para a profundidade (pasta) que deseja ler
-COMMENTS_CSV_PATH = f"{OUTPUT_DIR}/all_comments_depth_{DEPTH_TO_SCRAPE}.csv"
+DEPTH_TO_SCRAPE = 2
+DATA_CSV_PATH = f"{OUTPUT_DIR}/all_data_depth_{DEPTH_TO_SCRAPE}.csv"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"
@@ -44,6 +44,61 @@ def get_html(url, retries=3):
             logging.error(f"Erro de conexão na tentativa {attempt + 1}: {e}")
             time.sleep(5)
     return None
+
+# ─────────────────────────────────────────────
+# EXTRAÇÃO DO CONTEÚDO DO POST (TÍTULO + CORPO)
+# ─────────────────────────────────────────────
+
+def parse_post_content(soup, post_id, subreddit):
+    """
+    Extrai os dados do post principal (título, corpo, autor, score, etc.)
+    a partir do div.thing com data-type='link' no #siteTable.
+    """
+    # O post principal fica no siteTable de listagem, como uma div.thing.link
+    post_thing = soup.find("div", class_="thing", attrs={"data-type": "link"})
+    if not post_thing:
+        return None
+
+    # 1. Título
+    title_tag = post_thing.find("a", class_="title")
+    title = title_tag.get_text(strip=True) if title_tag else ""
+
+    # 2. Corpo do post (texto self-post)
+    #    O expando contém o usertext-body com o conteúdo do post
+    expando = post_thing.find("div", class_="expando")
+    body = ""
+    if expando:
+        md_div = expando.find("div", class_="md")
+        if md_div:
+            body = md_div.get_text(separator=" ", strip=True)
+
+    # 3. Autor
+    author_tag = post_thing.find("a", class_="author")
+    author = author_tag.get_text(strip=True) if author_tag else "[deleted]"
+
+    # 4. Score
+    score_tag = post_thing.find("div", class_="score unvoted")
+    score = score_tag.get("title") if score_tag else post_thing.get("data-score", "0")
+
+    # 5. Timestamp
+    time_tag = post_thing.find("time")
+    timestamp = time_tag.get("datetime") if time_tag else None
+
+    # 6. Número de comentários
+    comments_count = post_thing.get("data-comments-count", "0")
+
+    return {
+        "type": "post",
+        "post_id": post_id,
+        "comment_id": "",
+        "subreddit": subreddit,
+        "author": author,
+        "timestamp": timestamp,
+        "score": score,
+        "title": title,
+        "text": body,
+        "comments_count": comments_count
+    }
 
 # ─────────────────────────────────────────────
 # EXTRAÇÃO DE COMENTÁRIOS DO HTML
@@ -95,13 +150,16 @@ def parse_comments(soup, post_id, subreddit):
         timestamp = time_tag.get("datetime") if time_tag else None
 
         comments_data.append({
+            "type": "comment",
             "post_id": post_id,
             "comment_id": comment_id,
             "subreddit": subreddit,
             "author": author,
             "timestamp": timestamp,
             "score": score,
-            "text": text
+            "title": "",
+            "text": text,
+            "comments_count": ""
         })
 
     return comments_data
@@ -110,12 +168,12 @@ def parse_comments(soup, post_id, subreddit):
 # FLUXO PRINCIPAL
 # ─────────────────────────────────────────────
 
-def scrape_comments_from_jsons():
-    # Prepara o arquivo CSV para salvar os comentários
-    csv_fields = ["post_id", "comment_id", "subreddit", "author", "timestamp", "score", "text"]
-    file_exists = os.path.exists(COMMENTS_CSV_PATH)
+def scrape_data_from_jsons():
+    # Prepara o arquivo CSV para salvar posts + comentários
+    csv_fields = ["type", "post_id", "comment_id", "subreddit", "author", "timestamp", "score", "title", "text", "comments_count"]
+    file_exists = os.path.exists(DATA_CSV_PATH)
     
-    with open(COMMENTS_CSV_PATH, "a", newline="", encoding="utf-8") as csvfile:
+    with open(DATA_CSV_PATH, "a", newline="", encoding="utf-8") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=csv_fields)
         if not file_exists:
             writer.writeheader()
@@ -155,9 +213,18 @@ def scrape_comments_from_jsons():
                 
                 soup = get_html(post_url)
                 if soup:
+                    # Extrai o conteúdo do post (título + corpo)
+                    post_data = parse_post_content(soup, post_id, subreddit)
+                    if post_data:
+                        writer.writerow(post_data)
+                        logging.info(f"    -> Post extraído: {post_data['title'][:60]}...")
+                    else:
+                        logging.warning(f"    -> Não foi possível extrair o conteúdo do post.")
+
+                    # Extrai os comentários
                     extracted_comments = parse_comments(soup, post_id, subreddit)
                     
-                    # Salva os comentários rasparos imediatamente no CSV
+                    # Salva os comentários raspados imediatamente no CSV
                     for comment in extracted_comments:
                         writer.writerow(comment)
                     
@@ -167,4 +234,4 @@ def scrape_comments_from_jsons():
                 time.sleep(DELAY)
 
 if __name__ == "__main__":
-    scrape_comments_from_jsons()
+    scrape_data_from_jsons()
