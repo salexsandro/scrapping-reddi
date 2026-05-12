@@ -13,12 +13,12 @@ from bs4 import BeautifulSoup
 # Centralizadas no topo para facilitar ajustes sem mexer no código
 # ─────────────────────────────────────────────
 
-OUTPUT_DIR = "./"            # pasta raiz onde todos os dados serão salvos
+OUTPUT_DIR = "./org"            # pasta raiz onde todos os dados serão salvos
 MAX_SNOWBALL_DEPTH = 2          # número máximo de ciclos de expansão do snowball
 
 MAX_POSTS_PER_SUBREDDIT = 200   # máximo de posts coletados por subreddit
 MAX_USERS_PER_SUBREDDIT = 10    # amostra de usuários mais ativos por subreddit
-SORT_BY = "hot"                 # ordenação dos posts: "hot", "new", "top", "rising"
+SORT_BY = "top"                 # ordenação dos posts: "hot", "new", "top", "rising"
 
 MAX_POSTS_PER_USER = 20         # máximo de posts coletados por usuário
 
@@ -33,22 +33,27 @@ DELAY_BETWEEN_REQUESTS = 2      # segundos de espera entre requisições (evita 
 # ─────────────────────────────────────────────
 
 SEED_SUBREDDITS = [
-    # "depression",
-    # "Anxiety",
-    # "addiction",
-    # "teenagers",
+    "depression",
+    "Anxiety",
+    "addiction",
+    "teenagers",
     "nosurf",
     "selfimprovement",
     "selfhelp",
     "study",
-    # "studytips",
+    "studytips",
     "getdisciplined",
     "productivity",
     "digitalminimalism",
-    "simpleliving"
+    "simpleliving",
+    "ADHD",              
+    "DopamineDetoxing",  
+    "decidingtobebetter",
+    "MentalHealth",
+    "BingeEatingDisorder"
 ]
 
-SEARCH_QUERY = '(tiktok OR reels OR "youtube shorts" OR "short videos" OR "short-form" OR doomscrolling OR brainrot)'
+SEARCH_QUERY = '(tiktok OR reels OR "youtube shorts" OR "short videos" OR "short form" OR doomscrolling OR "doom scrolling" OR brainrot OR "attention span" OR "screen time" OR "scrolling addiction" OR "dopamine detox")'
 
 # Cabeçalho HTTP enviado em cada requisição
 # Simula um browser real para evitar bloqueios do Reddit
@@ -270,7 +275,7 @@ def scrape_subreddits(subreddits, depth, max_posts=MAX_POSTS_PER_SUBREDDIT):
         while len(all_data) < max_posts:
             safe_query = urllib.parse.quote(SEARCH_QUERY)
 
-            url = f"https://old.reddit.com/r/{subreddit}/search?q={safe_query}&restrict_sr=on&sort=/{SORT_BY}&t=all"
+            url = f"https://old.reddit.com/r/{subreddit}/search?q={safe_query}&restrict_sr=on&sort={SORT_BY}&t=all&include_over_18=on"
             if after:
                 # Paginação: ?after=t3_abc passa o cursor para a próxima página
                 url += f"&after={after}"

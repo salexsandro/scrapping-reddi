@@ -205,9 +205,9 @@ def scrape_data_from_jsons():
 
                 if not post_url:
                     # Se não houver url salva, constrói via ID
-                    post_url = f"https://old.reddit.com/r/{subreddit}/comments/{post_id.replace('t3_', '')}/"
+                    post_url = f"https://old.reddit.com/r/{subreddit}/comments/{post_id.replace('t3_', '')}/?over18=yes"
                 elif post_url.startswith("/r/"):
-                    post_url = f"https://old.reddit.com{post_url}"
+                    post_url = f"https://old.reddit.com{post_url}/?over18=yes"
 
                 logging.info(f"  Acessando: {post_url}")
                 
