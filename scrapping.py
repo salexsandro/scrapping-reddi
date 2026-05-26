@@ -11,8 +11,8 @@ from bs4 import BeautifulSoup
 # ─────────────────────────────────────────────
 
 OUTPUT_DIR = "./" 
-DEPTH_TO_SCRAPE = 2
-DATA_CSV_PATH = f"{OUTPUT_DIR}/all_data_depth_{DEPTH_TO_SCRAPE}.csv"
+DEPTH_TO_SCRAPE = 0
+DATA_CSV_PATH = f"{OUTPUT_DIR}/all_data_depth_{DEPTH_TO_SCRAPE}_title.csv"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"
